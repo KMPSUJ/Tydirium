@@ -50,6 +50,7 @@ void loop() {
   digitalWrite(PIN_D6, LOW);
   bool isClosed = digitalRead(PIN_D7);
   http.addHeader("Content-Type", "text/plain");
+  http.addHeader("Content-Length", "1");
   auto httpCode = http.POST(String(isClosed));
   Serial.println(httpCode);
   String payload = http.getString();
