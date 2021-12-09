@@ -14,7 +14,7 @@ const int PORT = 7216;
 // in seconds
 const int REPORT_DELAY_TIME = 120;
 // in seconds; if < 0 then no reconnect
-const int RECONNECT_DELAY_TIME = 30;
+const int RECONNECT_DELAY_TIME = -1; //30;
 
 void setup() {
   pinMode(PIN_D6, OUTPUT);
