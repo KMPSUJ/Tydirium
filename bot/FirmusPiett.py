@@ -74,7 +74,7 @@ class FirmusPiett(discord.Client):
         def __init__(self):
             self._communicates = [
                 ({"type" : discord.ActivityType.watching, "name" : "Koło zamknięte. Nakazuję odwrót!"},
-                 {"type" : discord.ActivityType.watching, "name" : "Koło otware. Utrzymujcie kurs i prędkość"}),
+                 {"type" : discord.ActivityType.watching, "name" : "Koło otwarte. Utrzymujcie kurs i prędkość"}),
                 ({"type" : discord.ActivityType.listening, "name" : "Knockin' On Koło's Door"},
                  {"type" : discord.ActivityType.listening, "name" : "Baby It's Cold Outside"})
             ]
