@@ -147,8 +147,6 @@ class FirmusPiett(discord.Client):
         HELP = "help"
         NEW_CODE = "new code"
         REPORT = "report"
-        TEST = "test"
-        NICK = "nick"
         cmd = cmd.strip()
         if cmd.startswith(HELP):
             await self.print_help(cmd[len(HELP):], channel, author)
@@ -156,10 +154,6 @@ class FirmusPiett(discord.Client):
             await self.new_code(cmd[len(NEW_CODE):], channel, author)
         elif cmd.startswith(REPORT):
             await self.report(cmd[len(REPORT):], channel, author)
-        elif cmd.startswith(TEST):
-            await self.testedit(cmd[len(TEST):], channel, author)
-        elif cmd.startswith(NICK):
-            await self.nick(cmd[len(NICK):], channel, author)
         else:
             await self.bad_command(channel, author)
 
