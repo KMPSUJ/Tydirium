@@ -68,14 +68,16 @@ def startControllPanel(panel):
         panel.server_close()
         print("Server stopped.")
 
+
 def gender(author):
     fname=author.display_name.split()[0]
     ll=list(fname)[-1]
     #print(ll)
     if ll == 'a':
-        return "Ma'am"
+        return "My Lady"
     else:
         return "Sir"
+
 
 class FirmusPiett(discord.Client):
     class Communicate:
@@ -161,13 +163,12 @@ class FirmusPiett(discord.Client):
         else:
             await self.bad_command(channel, author)
 
-
     async def print_help(self, cmd, channel, author):
-        Sir = gender(author)
+        salutation = gender(author)
         cmd = cmd.strip()
         if cmd != "" and cmd != "!" and cmd != ".":
             await self.bad_command(channel, author)
-        ans = f"Calm down, {Sir}, I'm here.\n" \
+        ans = f"Calm down, {salutation}, I'm here.\n" \
               "You can ask me for `report` to see current state of the door " \
               "and last time when it was updated.\n" \
               "You can also order me to `new code n`, so I would display " \
@@ -175,32 +176,32 @@ class FirmusPiett(discord.Client):
         await channel.send(ans)
 
     async def new_code(self, cmd, channel, author):
-        Sir = gender(author)
+        salutation = gender(author)
         cmd = cmd.strip()
         try:
             cmd = int(cmd)
             if 0 <= cmd < len(self._communicate._communicates):
                 self._communicate.setCurrent(cmd)
                 self._last_code = -1
-                await channel.send(f"Yes {Sir}! Code {cmd}")
+                await channel.send(f"Yes {salutation}! Code {cmd}")
             else:
-                await channel.send(f"{Sir}, code {cmd} is out of the protocol!")
+                await channel.send(f"{salutation}, code {cmd} is out of the protocol!")
         except:
             await self.bad_command(channel, author)
         
     async def report(self, cmd, channel, author):
-        Sir = gender(author)
+        salutation = gender(author)
         cmd = cmd.strip()
         if cmd != "" and cmd != "!" and cmd != ".":
             await self.bad_command(channel, author)
         await self.refreshStatus()
         ans = ""
         if self._last_code == 0:
-            ans += f"{Sir}, according to our intelligence the door is closed.\n"
+            ans += f"{salutation}, according to our intelligence the door is closed.\n"
         elif self._last_code == 1:
-            ans += f"{Sir}, according to our intelligence the door is open.\n"
+            ans += f"{salutation}, according to our intelligence the door is open.\n"
         else:
-            ans += f"{Sir}, despite many Bothans died, we have not determined the state of the door.\n"
+            ans += f"{salutation}, despite many Bothans died, we have not determined the state of the door.\n"
         if ControllPanel.last_update is None:
             ans += "We haven't received any information from them yet."
         else:
@@ -209,8 +210,8 @@ class FirmusPiett(discord.Client):
         await channel.send(ans)
 
     async def bad_command(self, channel, author):
-        Sir = gender(author)
-        await channel.send(f"We have some communication disruption, {Sir}. Please repeat.")
+        salutation = gender(author)
+        await channel.send(f"We have some communication disruption, {salutation}. Please repeat.")
 
 
 if __name__ == "__main__":
