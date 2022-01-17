@@ -70,10 +70,9 @@ def startControllPanel(panel):
 
 
 def gender(author):
-    fname=author.display_name.split()[0]
-    ll=list(fname)[-1]
-    #print(ll)
-    if ll == 'a':
+    first_name = author.display_name.split()[0]
+    name_ending = list(first_name)[-1]
+    if name_ending == 'a':
         return "My Lady"
     else:
         return "Sir"
