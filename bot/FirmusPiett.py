@@ -159,14 +159,14 @@ class FirmusPiett(discord.Client):
         elif cmd.startswith(NICK):
             await self.nick(cmd[len(NICK):], channel, author)
         else:
-            await self.bad_command(channel)
+            await self.bad_command(channel, author)
 
 
     async def print_help(self, cmd, channel, author):
         Sir = gender(author)
         cmd = cmd.strip()
         if cmd != "" and cmd != "!" and cmd != ".":
-            await self.bad_command(channel)
+            await self.bad_command(channel, author)
         ans = f"Calm down, {Sir}, I'm here.\n" \
               "You can ask me for `report` to see current state of the door " \
               "and last time when it was updated.\n" \
@@ -186,13 +186,13 @@ class FirmusPiett(discord.Client):
             else:
                 await channel.send(f"{Sir}, code {cmd} is out of the protocol!")
         except:
-            await self.bad_command(channel)
+            await self.bad_command(channel, author)
         
     async def report(self, cmd, channel, author):
         Sir = gender(author)
         cmd = cmd.strip()
         if cmd != "" and cmd != "!" and cmd != ".":
-            await self.bad_command(channel)
+            await self.bad_command(channel, author)
         await self.refreshStatus()
         ans = ""
         if self._last_code == 0:
