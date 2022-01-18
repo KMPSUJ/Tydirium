@@ -172,13 +172,17 @@ class FirmusPiett(discord.Client):
         salutation = gender(author)
         cmd = cmd.strip()
         try:
-            cmd = int(cmd)
-            if 0 <= cmd < len(self._communicate._communicates):
-                self._communicate.setCurrent(cmd)
-                self._last_code = -1
-                await channel.send(f"Yes {salutation}! Code {cmd}")
+            perms = author.guild_permissions
+            if perms.administrator or perms.manage_channels or perms.manage_guild or perms.manage_nicknames or perms.manage_messages or perms.manage_roles:
+                cmd = int(cmd)
+                if 0 <= cmd < len(self._communicate._communicates):
+                    self._communicate.setCurrent(cmd)
+                    self._last_code = -1
+                    await channel.send(f"Yes {salutation}! Code {cmd}")
+                else:
+                    await channel.send(f"{salutation}, code {cmd} is out of the protocol!")
             else:
-                await channel.send(f"{salutation}, code {cmd} is out of the protocol!")
+                await channel.send(f"{salutation}, your powers are insufficient to set a new code.")
         except:
             await self.bad_command(channel, author)
         
