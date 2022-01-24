@@ -27,7 +27,7 @@ def gender(author):
         return "Sir"
 
 
-def parse_request(r: requests.models.Response):
+def parse_response(r: requests.models.Response):
     content = r.text
     door_state = int(content.split('\n')[0])
     last_update = datetime.strptime(content.split('\n')[1], date_format)
@@ -73,11 +73,12 @@ class FirmusPiett(discord.Client):
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
-        if ControllPanel.last_update is not None and \
-           (now - ControllPanel.last_update) > PATIENCE:
-            ControllPanel.code_blue = -1
-        if self._last_code != ControllPanel.code_blue:
-            self._last_code = ControllPanel.code_blue
+        r = requests.get("http://%s:%s" % (HOST_NAME, PORT))
+        door_state, last_update = parse_response(r)
+        if last_update is not None and (now - last_update) > PATIENCE:
+            door_state = -1
+        if self._last_code != door_state:
+            self._last_code = door_state
             presence = self._communicate.get(self._last_code)
             await self.change_presence(**presence)
         print("Current code:", self._communicate._currentlyUsed, "/", self._last_code)
