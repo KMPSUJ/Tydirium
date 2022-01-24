@@ -6,6 +6,7 @@ from time import sleep
 from datetime import datetime, timedelta
 import discord
 from discord.ext import tasks
+import requests
 
 
 HOST_NAME = ""
@@ -14,6 +15,7 @@ PIETT_TOKEN = os.environ['PIETT_TOKEN']
 PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10 # in seconds
 CMD_LEADER = "Admiral,"
+date_format = "%Y-%m-%d %H:%M:%S"
 
 
 def gender(author):
@@ -23,6 +25,13 @@ def gender(author):
         return "My Lady"
     else:
         return "Sir"
+
+
+def parse_request(r: requests.models.Response):
+    content = r.text
+    door_state = int(content.split('\n')[0])
+    last_update = datetime.strptime(content.split('\n')[1], date_format)
+    return door_state, last_update
 
 
 class FirmusPiett(discord.Client):
@@ -54,7 +63,6 @@ class FirmusPiett(discord.Client):
             else:
                 response["activity"] = discord.Activity(**self._communicates[self._currentlyUsed][state])
             return response
-
 
     def __init__(self):
         super().__init__()
