@@ -14,6 +14,7 @@ PORT = 7216
 PATIENCE = timedelta(minutes=10, seconds=0)
 HTTP_TIMEOUT = 10  # in seconds
 SERVER_LIFETIME = 300  # in seconds
+date_format = "%Y-%m-%d %H:%M:%S"
 
 
 class ControllPanel(BaseHTTPRequestHandler):
@@ -51,7 +52,7 @@ class ControllPanel(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-        message = "door_state:" + str(self.code_blue)
+        message = str(self.code_blue) + "\n" + self.last_update.strftime(date_format)
         self.wfile.write(bytes(message, "utf8"))
 
     @staticmethod
