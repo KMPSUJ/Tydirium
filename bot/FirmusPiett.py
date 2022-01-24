@@ -69,13 +69,14 @@ class FirmusPiett(discord.Client):
         #  self._panel = panel
         self._last_code = -1
         self._communicate = FirmusPiett.Communicate()
+        self.last_update = None
 
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
         r = requests.get("http://%s:%s" % (HOST_NAME, PORT))
-        door_state, last_update = parse_response(r)
-        if last_update is not None and (now - last_update) > PATIENCE:
+        door_state, self.last_update = parse_response(r)
+        if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
         if self._last_code != door_state:
             self._last_code = door_state
@@ -151,11 +152,11 @@ class FirmusPiett(discord.Client):
             ans += f"{salutation}, according to our intelligence the door is open.\n"
         else:
             ans += f"{salutation}, despite many Bothans died, we have not determined the state of the door.\n"
-        if ControllPanel.last_update is None:
+        if self.last_update is None:
             ans += "We haven't received any information from them yet."
         else:
             ans += "Last update from Tydirium was received "
-            ans += ControllPanel.last_update.strftime("%d.%m.%Y at %H:%M:%S.")
+            ans += self.last_update.strftime("%d.%m.%Y at %H:%M:%S.")
         await channel.send(ans)
 
     async def bad_command(self, channel, author):
