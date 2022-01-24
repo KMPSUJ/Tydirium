@@ -1,8 +1,4 @@
-import time
-import sys
 import os
-from threading import Thread
-from time import sleep
 from datetime import datetime, timedelta
 import discord
 from discord.ext import tasks
@@ -13,7 +9,7 @@ HOST_NAME = ""
 PORT = 7216
 PIETT_TOKEN = os.environ['PIETT_TOKEN']
 PATIENCE = timedelta(minutes=10, seconds=0)
-REFRESH_TIME = 10 # in seconds
+REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
 date_format = "%Y-%m-%d %H:%M:%S"
 

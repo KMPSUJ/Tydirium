@@ -1,17 +1,13 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import time
 import sys
-import os
 from threading import Thread
-from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime
 # import cgi
 
 
 HOST_NAME = ""
 PORT = 7216
-PATIENCE = timedelta(minutes=10, seconds=0)
 HTTP_TIMEOUT = 10  # in seconds
 SERVER_LIFETIME = 300  # in seconds
 date_format = "%Y-%m-%d %H:%M:%S"
