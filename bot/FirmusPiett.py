@@ -1,10 +1,9 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
-import sys, os
+import sys
+import os
 from threading import Thread
 from time import sleep
 from datetime import datetime, timedelta
-#import cgi
 import discord
 from discord.ext import tasks
 
@@ -13,60 +12,8 @@ HOST_NAME = ""
 PORT = 7216
 PIETT_TOKEN = os.environ['PIETT_TOKEN']
 PATIENCE = timedelta(minutes=10, seconds=0)
-HTTP_TIMEOUT = 10 # in seconds
 REFRESH_TIME = 10 # in seconds
-SERVER_LIFETIME = 300 # in seconds
 CMD_LEADER = "Admiral,"
-
-
-class ControllPanel(BaseHTTPRequestHandler):
-    code_blue = -1
-    last_update = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        #  self.code_blue = -1
-
-    def do_POST(self):
-        print("I got POST")
-        def acceptPost():
-            try:
-                self.send_response(200)
-                self.send_header('Content-Type', 'text/html')
-                self.end_headers()
-                #  ctype, pdict = cgi.parse_header(self.headers.get('Content-Type'))
-                body = self.rfile.read()
-                ControllPanel.code_blue = ControllPanel.parseAsExpected(body)
-                ControllPanel.last_update = datetime.now()
-                output = ""
-                self.wfile.write(output.encode())
-                print("Received code:", ControllPanel.code_blue)
-            except:
-                self.send_error(404, "{}".format(sys.exc_info()[0]))
-                print(sys.exc_info())
-        serveThread = Thread(target=acceptPost, args={})
-        serveThread.start()
-        serveThread.join(timeout=HTTP_TIMEOUT)
-
-    @staticmethod
-    def parseAsExpected(body):
-        body = str(body)
-        if body[0] == 'b' and body[1] == body[-1] == '\'':
-            return int(body[2:-1])
-        else:
-            return -1
-
-
-def startControllPanel(panel):
-    print("Server started http://%s:%s" % (HOST_NAME, PORT))
-    try:
-        while True:
-            th = Thread(target=panel.serve_forever)
-            th.start()
-            th.join(timeout=SERVER_LIFETIME)
-    except KeyboardInterrupt:
-        panel.server_close()
-        print("Server stopped.")
 
 
 def gender(author):
@@ -208,12 +155,5 @@ class FirmusPiett(discord.Client):
 
 
 if __name__ == "__main__":
-    server = HTTPServer((HOST_NAME, PORT), ControllPanel)
-    server_thread = Thread(target=startControllPanel, args={server})
-    server_thread.start()
-
     piett = FirmusPiett()
     piett.run(PIETT_TOKEN)
-
-    server_thread.join()
-
