@@ -34,15 +34,15 @@ class FirmusPiett(discord.Client):
     class Communicate:
         def __init__(self):
             self._communicates = [
-                ({"type" : discord.ActivityType.watching, "name" : "Koło zamknięte. Nakazuję odwrót!"},
-                 {"type" : discord.ActivityType.watching, "name" : "Koło otwarte. Utrzymujcie kurs i prędkość"}),
-                ({"type" : discord.ActivityType.listening, "name" : "Knockin' On Koło's Door"},
-                 {"type" : discord.ActivityType.listening, "name" : "Baby It's Cold Outside"})
+                ({"type": discord.ActivityType.watching, "name": "Koło zamknięte. Nakazuję odwrót!"},
+                 {"type": discord.ActivityType.watching, "name": "Koło otwarte. Utrzymujcie kurs i prędkość"}),
+                ({"type": discord.ActivityType.listening, "name": "Knockin' On Koło's Door"},
+                 {"type": discord.ActivityType.listening, "name": "Baby It's Cold Outside"})
             ]
             self._status = {
                 -1: discord.Status.invisible,
-                0 : discord.Status.do_not_disturb,
-                1 : discord.Status.online
+                0: discord.Status.do_not_disturb,
+                1: discord.Status.online
             }
             self._currentlyUsed = 0
 
