@@ -15,7 +15,7 @@ date_format = "%Y-%m-%d %H:%M:%S"
 
 class ControllPanel(BaseHTTPRequestHandler):
     code_blue = -1
-    last_update = None
+    last_update = datetime(1999, 12, 12, 12, 12, 12, 12)  # the type is always the same, easier to generate message
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,7 +48,7 @@ class ControllPanel(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-        message = str(self.code_blue) + "\n" + self.last_update.strftime(date_format)
+        message = self.generate_door_state_message()
         self.wfile.write(bytes(message, "utf8"))
 
     @staticmethod
@@ -58,6 +58,9 @@ class ControllPanel(BaseHTTPRequestHandler):
             return int(body[2:-1])
         else:
             return -1
+
+    def generate_door_state_message(self) -> str:
+        return str(self.code_blue) + "\n" + self.last_update.strftime(date_format)
 
 
 def startControllPanel(panel):

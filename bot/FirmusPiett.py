@@ -2,16 +2,15 @@ import os
 from datetime import datetime, timedelta
 import discord
 from discord.ext import tasks
-import requests
+from bot.server_client import get_door_state
 
 
-HOST_NAME = ""
+HOST_NAME = "localhost"
 PORT = 7216
 PIETT_TOKEN = os.environ['PIETT_TOKEN']
 PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
-date_format = "%Y-%m-%d %H:%M:%S"
 
 
 def gender(author):
@@ -21,13 +20,6 @@ def gender(author):
         return "My Lady"
     else:
         return "Sir"
-
-
-def parse_response(r: requests.models.Response):
-    content = r.text
-    door_state = int(content.split('\n')[0])
-    last_update = datetime.strptime(content.split('\n')[1], date_format)
-    return door_state, last_update
 
 
 class FirmusPiett(discord.Client):
@@ -70,8 +62,7 @@ class FirmusPiett(discord.Client):
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
-        r = requests.get("http://%s:%s" % (HOST_NAME, PORT))
-        door_state, self.last_update = parse_response(r)
+        door_state, self.last_update = get_door_state(HOST_NAME, PORT)
         if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
         if self._last_code != door_state:
@@ -149,6 +140,8 @@ class FirmusPiett(discord.Client):
         else:
             ans += f"{salutation}, despite many Bothans died, we have not determined the state of the door.\n"
         if self.last_update is None:
+            ans += "We haven't received any information from them yet."
+        elif self.last_update.year < 2000:
             ans += "We haven't received any information from them yet."
         else:
             ans += "Last update from Tydirium was received "
