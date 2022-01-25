@@ -7,7 +7,7 @@ from bot.server_client import get_door_state
 
 HOST_NAME = "localhost"
 PORT = 7216
-PIETT_TOKEN = os.environ['PIETT_TOKEN']
+PIETT_TOKEN = os.getenv('PIETT_TOKEN', "")
 PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
