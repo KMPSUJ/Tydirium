@@ -14,7 +14,7 @@ if __name__ == '__main__':
     server_thread = Thread(target=startControllPanel, args={server})
     server_thread.start()
 
-    piett = FirmusPiett()
+    piett = FirmusPiett(HOST_NAME, PORT)
     piett.run(PIETT_TOKEN)
 
     server_thread.join()

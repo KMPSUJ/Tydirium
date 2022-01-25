@@ -23,6 +23,8 @@ def gender(author):
 
 
 class FirmusPiett(discord.Client):
+    host_name: str
+    port: int
     class Communicate:
         def __init__(self):
             self._communicates = [
@@ -52,17 +54,22 @@ class FirmusPiett(discord.Client):
                 response["activity"] = discord.Activity(**self._communicates[self._currentlyUsed][state])
             return response
 
-    def __init__(self):
+    def __init__(self, host: str, port: int):
         super().__init__()
         #  self._panel = panel
         self._last_code = -1
         self._communicate = FirmusPiett.Communicate()
         self.last_update = None
+        if host == "":
+            self.host_name = "localhost"
+        else:
+            self.host_name = host
+        self.port = port
 
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
-        door_state, self.last_update = get_door_state(HOST_NAME, PORT)
+        door_state, self.last_update = get_door_state(self.host_name, self.port)
         if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
         if self._last_code != door_state:
@@ -154,5 +161,5 @@ class FirmusPiett(discord.Client):
 
 
 if __name__ == "__main__":
-    piett = FirmusPiett()
+    piett = FirmusPiett(HOST_NAME, PORT)
     piett.run(PIETT_TOKEN)
