@@ -77,7 +77,4 @@ def startControllPanel(panel):
 
 if __name__ == "__main__":
     server = HTTPServer((HOST_NAME, PORT), ControllPanel)
-    server_thread = Thread(target=startControllPanel, args={server})
-    server_thread.start()
-
-    server_thread.join()
+    startControllPanel(server)
