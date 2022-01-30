@@ -1,4 +1,3 @@
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import sys
 from threading import Thread
@@ -10,40 +9,37 @@ HOST_NAME = ""
 PORT = 7216
 HTTP_TIMEOUT = 10  # in seconds
 SERVER_LIFETIME = 300  # in seconds
-date_format = "%Y-%m-%d %H:%M:%S"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class ControllPanel(BaseHTTPRequestHandler):
     code_blue = -1
-    last_update = datetime(1999, 12, 12, 12, 12, 12, 12)  # the type is always the same, easier to generate message
+    # the type is always the same, easier to generate message
+    last_update = datetime(1999, 12, 12, 12, 12, 12, 12)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        #  self.code_blue = -1
-
-    def do_POST(self):
+    def do_POST(self): # pylint: disable=C0103
         print("I got POST")
 
-        def acceptPost():
+        def accept_post():
             try:
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                #  ctype, pdict = cgi.parse_header(self.headers.get('Content-Type'))
-                body = self.rfile.read(1)  # reads ONLY one byte (works as long as only one service is connecting)
-                ControllPanel.code_blue = ControllPanel.parseAsExpected(body)
+                # reads ONLY one byte (works as long as only one service is connecting)
+                body = self.rfile.read(1)
+                ControllPanel.code_blue = ControllPanel.parse_as_expected(body)
                 ControllPanel.last_update = datetime.now()
                 output = ""
                 self.wfile.write(output.encode())
                 print("Received code:", ControllPanel.code_blue)
             except:
-                self.send_error(404, "{}".format(sys.exc_info()[0]))
+                self.send_error(404, f"{sys.exc_info()[0]}")
                 print(sys.exc_info())
-        serveThread = Thread(target=acceptPost, args={})
-        serveThread.start()
-        serveThread.join(timeout=HTTP_TIMEOUT)
+        serve_thread = Thread(target=accept_post, args={})
+        serve_thread.start()
+        serve_thread.join(timeout=HTTP_TIMEOUT)
 
-    def do_GET(self):
+    def do_GET(self): # pylint: disable=C0103
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -52,24 +48,23 @@ class ControllPanel(BaseHTTPRequestHandler):
         self.wfile.write(bytes(message, "utf8"))
 
     @staticmethod
-    def parseAsExpected(body):
+    def parse_as_expected(body):
         body = str(body)
         if body[0] == 'b' and body[1] == body[-1] == '\'':
             return int(body[2:-1])
-        else:
-            return -1
+        return -1
 
     def generate_door_state_message(self) -> str:
-        return str(self.code_blue) + "\n" + self.last_update.strftime(date_format)
+        return str(self.code_blue) + "\n" + self.last_update.strftime(DATE_FORMAT)
 
 
-def startControllPanel(panel):
-    print("Server started http://%s:%s" % (HOST_NAME, PORT))
+def start_controll_panel(panel):
+    print(f"Server started http://{HOST_NAME}:{PORT}")
     try:
         while True:
-            th = Thread(target=panel.serve_forever)
-            th.start()
-            th.join(timeout=SERVER_LIFETIME)
+            thread = Thread(target=panel.serve_forever)
+            thread.start()
+            thread.join(timeout=SERVER_LIFETIME)
     except KeyboardInterrupt:
         panel.server_close()
         print("Server stopped.")
@@ -77,4 +72,4 @@ def startControllPanel(panel):
 
 if __name__ == "__main__":
     server = HTTPServer((HOST_NAME, PORT), ControllPanel)
-    startControllPanel(server)
+    start_controll_panel(server)
