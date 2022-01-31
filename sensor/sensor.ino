@@ -26,7 +26,10 @@ void setup() {
   Serial.print("\nConnecting with WiFi...");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
-    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW); // turn LED *ON*
+    delay(500);
+    digitalWrite(LED_BUILTIN, HIGH); // turn LED *OFF*
+    delay(500);
   }
   Serial.print("\nConnected with ");
   Serial.println(WiFi_NAME); 
@@ -43,6 +46,7 @@ void loop() {
       return;
     delay(RECONNECT_DELAY_TIME*1000);
   }
+  digitalWrite(LED_BUILTIN, LOW); // turn LED *ON*
   Serial.print("Successfully connected with ");
   Serial.println(HOST);
   HTTPClient http;
@@ -56,6 +60,8 @@ void loop() {
   String payload = http.getString();
   Serial.println(payload);
   http.end();
+  delay(3000);
+  digitalWrite(LED_BUILTIN, HIGH); // turn LED *OFF*
   // delay(REPORT_DELAY_TIME*1000);
   // For deepSleep to work pin D0 musi be connected to RST
   // After deepSleep ESP will be reset
