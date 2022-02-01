@@ -17,13 +17,6 @@ NEW_CODE = "new code"
 REPORT = "report"
 
 
-def gender(author):
-    first_name = author.display_name.split()[0]
-    name_ending = list(first_name)[-1]
-    if name_ending == 'a':
-        return "My Lady"
-    return "Sir"
-
 
 class FirmusPiett(discord.Client):
     host_name: str
@@ -107,6 +100,14 @@ class FirmusPiett(discord.Client):
                 message.author,
             )
 
+    @staticmethod
+    def get_salutation(author):
+        first_name = author.display_name.split()[0]
+        name_ending = list(first_name)[-1]
+        if name_ending == 'a':
+            return "My Lady"
+        return "Sir"
+
     async def execute_order(self, cmd, channel, author):
         cmd = cmd.strip()
         if cmd.startswith(HELP):
@@ -118,12 +119,12 @@ class FirmusPiett(discord.Client):
         else:
             await FirmusPiett.bad_command(channel, author)
 
-    @classmethod
-    async def print_help(cls, cmd, channel, author):
-        salutation = gender(author)
+    @staticmethod
+    async def print_help(cmd, channel, author):
+        salutation = FirmusPiett.get_salutation(author)
         cmd = cmd.strip()
         if not cmd in ["", "!", "."]:
-            await cls.bad_command(channel, author)
+            await FirmusPiett.bad_command(channel, author)
         ans = f"Calm down, {salutation}, I'm here.\n" \
               "You can ask me for `report` to see current state of the door " \
               "and last time when it was updated.\n" \
@@ -132,7 +133,7 @@ class FirmusPiett(discord.Client):
         await channel.send(ans)
 
     async def new_code(self, cmd, channel, author):
-        salutation = gender(author)
+        salutation = FirmusPiett.get_salutation(author)
         cmd = cmd.strip()
         try:
             perms = author.guild_permissions
@@ -159,7 +160,7 @@ class FirmusPiett(discord.Client):
             await FirmusPiett.bad_command(channel, author)
 
     async def report(self, cmd, channel, author):
-        salutation = gender(author)
+        salutation = FirmusPiett.get_salutation(author)
         cmd = cmd.strip()
         if not cmd in ["", "!", "."]:
             await FirmusPiett.bad_command(channel, author)
@@ -181,9 +182,9 @@ class FirmusPiett(discord.Client):
             ans += self.last_update.strftime("%d.%m.%Y at %H:%M:%S.")
         await channel.send(ans)
 
-    @classmethod
-    async def bad_command(cls, channel, author):
-        salutation = gender(author)
+    @staticmethod
+    async def bad_command(channel, author):
+        salutation = FirmusPiett.get_salutation(author)
         await channel.send(f"We have some communication disruption, {salutation}. Please repeat.")
 
 
