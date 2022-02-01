@@ -108,6 +108,24 @@ class FirmusPiett(discord.Client):
             return "My Lady"
         return "Sir"
 
+    @staticmethod
+    def has_permissions(author, reqired_level):
+        perms = author.guild_permissions
+        if reqired_level == 0:
+            return True
+        if reqired_level == 1:
+            return any([
+                perms.administrator,
+                perms.manage_channels,
+                perms.manage_guild,
+                perms.manage_nicknames,
+                perms.manage_messages,
+                perms.manage_roles,
+            ])
+        if reqired_level == 2:
+            return perms.administrator
+        return False
+
     async def execute_order(self, cmd, channel, author):
         cmd = cmd.strip()
         if cmd.startswith(HELP):
@@ -134,28 +152,20 @@ class FirmusPiett(discord.Client):
 
     async def new_code(self, cmd, channel, author):
         salutation = FirmusPiett.get_salutation(author)
+        if not FirmusPiett.has_permissions(author, 1):
+            await channel.send(
+                f"{salutation}, your powers are insufficient to set a new code.",
+            )
+            return
         cmd = cmd.strip()
         try:
-            perms = author.guild_permissions
-            if any([
-                perms.administrator,
-                perms.manage_channels,
-                perms.manage_guild,
-                perms.manage_nicknames,
-                perms.manage_messages,
-                perms.manage_roles,
-            ]):
-                cmd = int(cmd)
-                if 0 <= cmd < len(self._communicate.communicates):
-                    self._communicate.set_current(cmd)
-                    self._last_code = -1
-                    await channel.send(f"Yes {salutation}! Code {cmd}")
-                else:
-                    await channel.send(f"{salutation}, code {cmd} is out of the protocol!")
+            cmd = int(cmd)
+            if 0 <= cmd < len(self._communicate.communicates):
+                self._communicate.set_current(cmd)
+                self._last_code = -1
+                await channel.send(f"Yes {salutation}! Code {cmd}")
             else:
-                await channel.send(
-                    f"{salutation}, your powers are insufficient to set a new code.",
-                )
+                await channel.send(f"{salutation}, code {cmd} is out of the protocol!")
         except:
             await FirmusPiett.bad_command(channel, author)
 
