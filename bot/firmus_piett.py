@@ -39,12 +39,12 @@ class FirmusPiett(discord.Client):
                 0: discord.Status.do_not_disturb,
                 1: discord.Status.online
             }
-            self.currently_used = 0
+            self._currently_used = 0
 
         def set_current(self, idx):
             if idx < 0 or idx > len(self.communicates):
                 raise IndexError("no such communicate")
-            self.currently_used = idx
+            self._currently_used = idx
 
         def get(self, state):
             state = int(state) if 0 <= int(state) <= 1 else -1
@@ -53,7 +53,7 @@ class FirmusPiett(discord.Client):
                 response["activity"] = None
             else:
                 response["activity"] = discord.Activity(
-                    **self.communicates[self.currently_used][state]
+                    **self.communicates[self._currently_used][state]
                 )
             return response
 
@@ -79,12 +79,10 @@ class FirmusPiett(discord.Client):
             self._last_code = door_state
             presence = self._communicate.get(self._last_code)
             await self.change_presence(**presence)
-        print("Current code:", self._communicate.currently_used, "/", self._last_code)
 
     async def on_ready(self):
         try:
             self.refresh_status.start() # pylint: disable=E1101
-            print(f"We have logged in as {self.user}")
         except:
             pass
         presence = self._communicate.get(self._last_code)
