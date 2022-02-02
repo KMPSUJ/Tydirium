@@ -75,7 +75,7 @@ class FirmusPiett(discord.Client):
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
-        self.previous_code=self._last_code
+        previous_code = self._last_code
         door_state, self.last_update = get_door_state(self.host_name, self.port)
         if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
@@ -83,7 +83,7 @@ class FirmusPiett(discord.Client):
             self._last_code = door_state
             presence = self._communicate.get(self._last_code)
             await self.change_presence(**presence)
-        if self._last_code != self.previous_code:
+        if self._last_code != previous_code:
             export(self._last_code,now)
         print("Current code:", self._communicate._currentlyUsed, "/", self._last_code)
 
