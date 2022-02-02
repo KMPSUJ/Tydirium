@@ -13,7 +13,7 @@ REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
 
 
-def export(code, last):
+def save_door_state(code, last):
     file_path = "./stats.txt"
     with open(file_path, "a") as f:
         f.write(f"{last.strftime('%Y %m %d %H %M %S')}  {code}\n")
@@ -84,7 +84,7 @@ class FirmusPiett(discord.Client):
             presence = self._communicate.get(self._last_code)
             await self.change_presence(**presence)
         if self._last_code != previous_code:
-            export(self._last_code,now)
+            save_door_state(self._last_code, now)
         print("Current code:", self._communicate._currentlyUsed, "/", self._last_code)
 
     async def on_ready(self):
