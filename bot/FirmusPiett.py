@@ -12,10 +12,12 @@ PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
 
+
 def export(code, last):
-    FILE = open("./stats.txt","a")
-    FILE.write(f"{last.strftime('%Y %m %d %H %M %S')}  {code}\n")
-    FILE.close()
+    file_path = "./stats.txt"
+    with open(file_path, "a") as f:
+        f.write(f"{last.strftime('%Y %m %d %H %M %S')}  {code}\n")
+
 
 def gender(author):
     first_name = author.display_name.split()[0]
