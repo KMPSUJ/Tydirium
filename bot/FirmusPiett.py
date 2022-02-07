@@ -12,10 +12,12 @@ PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10  # in seconds
 CMD_LEADER = "Admiral,"
 
-def export(code, last):
-    FILE = open("./stats.txt","a")
-    FILE.write(f"{last.strftime('%Y %m %d %H %M %S')}  {code}\n")
-    FILE.close()
+
+def save_door_state(code, last):
+    file_path = "./stats.txt"
+    with open(file_path, "a") as f:
+        f.write(f"{last.strftime('%Y %m %d %H %M %S')}  {code}\n")
+
 
 def gender(author):
     first_name = author.display_name.split()[0]
@@ -73,7 +75,7 @@ class FirmusPiett(discord.Client):
     @tasks.loop(seconds=REFRESH_TIME)
     async def refreshStatus(self):
         now = datetime.now()
-        self.previous_code=self._last_code
+        previous_code = self._last_code
         door_state, self.last_update = get_door_state(self.host_name, self.port)
         if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
@@ -81,8 +83,8 @@ class FirmusPiett(discord.Client):
             self._last_code = door_state
             presence = self._communicate.get(self._last_code)
             await self.change_presence(**presence)
-        if self._last_code != self.previous_code:
-            export(self._last_code,now)
+        if self._last_code != previous_code:
+            save_door_state(self._last_code, now)
         print("Current code:", self._communicate._currentlyUsed, "/", self._last_code)
 
     async def on_ready(self):
