@@ -119,22 +119,25 @@ class FirmusPiett(discord.Client):
         return "Sir"
 
     @staticmethod
-    def has_permissions(author, reqired_level):
-        perms = author.guild_permissions
-        if reqired_level == 0:
-            return True
-        if reqired_level == 1:
-            return any([
-                perms.administrator,
-                perms.manage_channels,
-                perms.manage_guild,
-                perms.manage_nicknames,
-                perms.manage_messages,
-                perms.manage_roles,
-            ])
-        if reqired_level == 2:
-            return perms.administrator
-        return False
+    def has_permissions(author, required_level):
+        try:
+            perms = author.guild_permissions
+            if required_level == 0:
+                return True
+            if required_level == 1:
+                return any([
+                    perms.administrator,
+                    perms.manage_channels,
+                    perms.manage_guild,
+                    perms.manage_nicknames,
+                    perms.manage_messages,
+                    perms.manage_roles,
+                ])
+            if required_level == 2:
+                return perms.administrator
+            return False
+        except:
+            return False
 
     async def execute_order(self, cmd, channel, author):
         cmd = cmd.strip()
