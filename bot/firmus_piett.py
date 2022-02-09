@@ -167,7 +167,7 @@ class FirmusPiett(discord.Client):
         salutation = FirmusPiett.get_salutation(author)
         if not FirmusPiett.has_permissions(author, 1):
             await channel.send(
-                f"{salutation}, your powers are insufficient to set a new code.",
+                f"{salutation}, your powers are insufficient to set a new code."
             )
             return
         cmd = cmd.strip()
@@ -185,7 +185,7 @@ class FirmusPiett(discord.Client):
     async def report(self, cmd, channel, author):
         salutation = FirmusPiett.get_salutation(author)
         cmd = cmd.strip()
-        if not cmd in ["", "!", "."]:
+        if cmd not in ["", "!", "."]:
             await FirmusPiett.bad_command(channel, author)
         await self.refresh_status()
         ans = ""
