@@ -13,6 +13,13 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class ControllPanel(BaseHTTPRequestHandler):
+    """
+    Main HTTP server.
+    Responsible for receiving posts from sensor (Tydirium)
+    with current state of the door and providing this information
+    to discord bot.
+    """
+
     code_blue = -1
     # the type is always the same, easier to generate message
     last_update = datetime(1999, 12, 12, 12, 12, 12, 12)

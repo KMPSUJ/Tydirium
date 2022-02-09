@@ -19,10 +19,22 @@ REPORT = "report"
 
 
 class FirmusPiett(discord.Client):
+    """
+    Main class for maintaining discord bot.
+    Responsible for correct displaying state of the door as bot status
+    and responding for users commands.
+    """
+
     host_name: str
     port: int
 
     class Communicate:
+        """
+        Discord bot inner class. Store all possible bot statuses
+        and index of the one currently in use.
+        Give easy access to proper communicate.
+        """
+
         def __init__(self):
             self.communicates = [
                 ({"type": discord.ActivityType.watching,
