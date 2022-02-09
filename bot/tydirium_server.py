@@ -69,9 +69,11 @@ def start_controll_panel(panel):
     print(f"Server started http://{HOST_NAME}:{PORT}")
     try:
         while True:
-            thread = Thread(target=panel.serve_forever)
+            thread = Thread(target=panel.serve_forever, name="Tydirium server")
             thread.start()
             thread.join(timeout=SERVER_LIFETIME)
+            if thread.is_alive():
+                panel.shutdown()
     except KeyboardInterrupt:
         panel.server_close()
         print("Server stopped.")
