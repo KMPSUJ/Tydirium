@@ -1,4 +1,4 @@
-
+import os
 from http.server import HTTPServer
 from threading import Thread
 from bot.FirmusPiett import FirmusPiett
@@ -6,7 +6,7 @@ from bot.TydiriumServer import startControllPanel, ControllPanel
 
 HOST_NAME = ""
 PORT = 7216
-PIETT_TOKEN = ""
+PIETT_TOKEN = os.getenv('PIETT_TOKEN', "")
 
 
 if __name__ == '__main__':
