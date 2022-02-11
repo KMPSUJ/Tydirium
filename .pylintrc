@@ -1,0 +1,5 @@
+[MASTER]
+disable=
+    C0114, # Missing module docstring
+    C0116, # Missing function or method docstring
+    W0702, # No exception type(s) specified (bare-except)
