@@ -65,8 +65,8 @@ class ControllPanel(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            # reads ONLY one byte (works as long as only one service is connecting)
-            body = self.rfile.read(1)
+            # checks the Content-Length and reads the whole message
+            body = self.rfile.read(int(self.headers["Content-Length"]))
             ControllPanel.code_blue = ControllPanel.parse_as_expected(body)
             ControllPanel.last_update = datetime.now()
             output = ""
