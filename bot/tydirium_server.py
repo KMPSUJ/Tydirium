@@ -50,12 +50,13 @@ class ControllPanel(BaseHTTPRequestHandler):
             serve_process.terminate()
 
     def do_GET(self): # pylint: disable=C0103
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        message = self.generate_door_state_message()
-        self.wfile.write(bytes(message, "utf8"))
+        if self.path == "/door-state":
+            message = bytes(self.generate_door_state_message(), "utf8")
+        elif self.path == "/door-state-prediction":
+            message = bytes("-1", "utf8")
+        else:
+            message = bytes(f"The path {self.path} is unknown. Try /door-state", "utf8")
+        self.respond_with_this_message(message)
 
     @staticmethod
     def parse_as_expected(body):
@@ -66,6 +67,13 @@ class ControllPanel(BaseHTTPRequestHandler):
 
     def generate_door_state_message(self) -> str:
         return str(self.code_blue) + "\n" + self.last_update.strftime(DATE_FORMAT)
+
+    def respond_with_this_message(self, message: bytes):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.send_header("Content-Length", str(len(message)))
+        self.end_headers()
+        self.wfile.write(message)
 
 
 def start_controll_panel(panel):
