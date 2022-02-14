@@ -28,22 +28,7 @@ class ControllPanel(BaseHTTPRequestHandler):
     def do_POST(self): # pylint: disable=C0103
         print("I got POST")
 
-        def accept_post():
-            try:
-                self.send_response(200)
-                self.send_header('Content-Type', 'text/html')
-                self.end_headers()
-                # reads ONLY one byte (works as long as only one service is connecting)
-                body = self.rfile.read(1)
-                ControllPanel.code_blue = ControllPanel.parse_as_expected(body)
-                ControllPanel.last_update = datetime.now()
-                output = ""
-                self.wfile.write(output.encode())
-                print("Received code:", ControllPanel.code_blue)
-            except:
-                self.send_error(404, f"{sys.exc_info()[0]}")
-                print(sys.exc_info())
-        serve_process = Process(target=accept_post, args={})
+        serve_process = Process(target=self.accept_post, args={})
         serve_process.start()
         serve_process.join(timeout=HTTP_TIMEOUT)
         if serve_process.is_alive():
@@ -74,6 +59,22 @@ class ControllPanel(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(message)))
         self.end_headers()
         self.wfile.write(message)
+
+    def accept_post(self):
+        try:
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            # reads ONLY one byte (works as long as only one service is connecting)
+            body = self.rfile.read(1)
+            ControllPanel.code_blue = ControllPanel.parse_as_expected(body)
+            ControllPanel.last_update = datetime.now()
+            output = ""
+            self.wfile.write(output.encode())
+            print("Received code:", ControllPanel.code_blue)
+        except:
+            self.send_error(404, f"{sys.exc_info()[0]}")
+            print(sys.exc_info())
 
 
 def start_controll_panel(panel):
