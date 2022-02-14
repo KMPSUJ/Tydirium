@@ -66,7 +66,7 @@ class ControllPanel(BaseHTTPRequestHandler):
 
 
 def start_controll_panel(panel):
-    print(f"Server started http://{HOST_NAME}:{PORT}", name="Tydirium server")
+    print(f"Server started http://{HOST_NAME}:{PORT}")
     try:
         while True:
             thread = Thread(target=panel.serve_forever, name="Tydirium server")
