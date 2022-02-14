@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import sys
 from threading import Thread
+from multiprocessing import Process
 from datetime import datetime
 # import cgi
 
@@ -42,9 +43,11 @@ class ControllPanel(BaseHTTPRequestHandler):
             except:
                 self.send_error(404, f"{sys.exc_info()[0]}")
                 print(sys.exc_info())
-        serve_thread = Thread(target=accept_post, args={})
-        serve_thread.start()
-        serve_thread.join(timeout=HTTP_TIMEOUT)
+        serve_process = Process(target=accept_post, args={})
+        serve_process.start()
+        serve_process.join(timeout=HTTP_TIMEOUT)
+        if serve_process.is_alive():
+            serve_process.terminate()
 
     def do_GET(self): # pylint: disable=C0103
         self.send_response(200)
