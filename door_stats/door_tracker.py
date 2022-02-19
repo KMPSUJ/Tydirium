@@ -30,7 +30,7 @@ class DoorStateTracker:
 
     def gather_hour_data(self, output_dir_path):
         start_time = datetime.now()
-        if 4 < start_time.minute < 55:
+        if 4 < start_time.minute:
             return None
         data = np.full(60, -2)
         for i in range(60):
@@ -51,7 +51,7 @@ class DoorStateTracker:
         s = sched.scheduler(time, sleep)
         for hour in range(starting_hour, 24):
             action_start_time = datetime(year=day.year, month=day.month, day=day.day, hour=hour, minute=0, second=0)
-            time_to_start = action_start_time - now
+            time_to_start = max(action_start_time - now, timedelta(seconds=1))
             s.enter(time_to_start.total_seconds(), 1, self.gather_hour_data, argument=(out_path,))
             print(hour)
 
