@@ -13,7 +13,7 @@ SERVER_LIFETIME = 300  # in seconds
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-class ControllPanel(BaseHTTPRequestHandler):
+class ControlPanel(BaseHTTPRequestHandler):
     """
     Main HTTP server.
     Responsible for receiving posts from sensor (Tydirium)
@@ -67,17 +67,17 @@ class ControllPanel(BaseHTTPRequestHandler):
             self.end_headers()
             # checks the Content-Length and reads the whole message
             body = self.rfile.read(int(self.headers["Content-Length"]))
-            ControllPanel.code_blue = ControllPanel.parse_as_expected(body)
-            ControllPanel.last_update = datetime.now()
+            ControlPanel.code_blue = ControlPanel.parse_as_expected(body)
+            ControlPanel.last_update = datetime.now()
             output = ""
             self.wfile.write(output.encode())
-            print("Received code:", ControllPanel.code_blue)
+            print("Received code:", ControlPanel.code_blue)
         except:
             self.send_error(404, f"{sys.exc_info()[0]}")
             print(sys.exc_info())
 
 
-def start_controll_panel(panel):
+def start_control_panel(panel):
     print(f"Server started http://{HOST_NAME}:{PORT}")
     try:
         while True:
@@ -92,5 +92,5 @@ def start_controll_panel(panel):
 
 
 if __name__ == "__main__":
-    server = HTTPServer((HOST_NAME, PORT), ControllPanel)
-    start_controll_panel(server)
+    server = HTTPServer((HOST_NAME, PORT), ControlPanel)
+    start_control_panel(server)
