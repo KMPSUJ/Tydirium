@@ -40,7 +40,7 @@ class DoorStateTracker:
                 data[i] = -1
             sleep(60 - time() % 60)
         file_name = self.generate_hour_file_name(start_time.date(), start_time.hour)
-        np.savetxt(f"{output_dir_path}/{file_name}", data)
+        np.savetxt(f"{output_dir_path}/{file_name}", data, fmt='%i')
 
     def schedule_daily_runs(self, day: date, out_path, starting_hour=0) -> Thread:
         now = datetime.now()
