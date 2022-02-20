@@ -4,10 +4,7 @@ from datetime import datetime, date, timedelta
 from time import time, sleep
 import sched
 import numpy as np
-from threading import Thread, enumerate
-
-data_validation_time = timedelta(seconds=300)  # seconds
-door_checking_period = 60  # seconds
+from threading import Thread
 
 
 class DoorStateTracker:
@@ -15,58 +12,61 @@ class DoorStateTracker:
     port: int
     door_state: int
     last_update: datetime
+    data_validation_time = timedelta(seconds=300)  # seconds
 
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
 
-    def track_door_state(self):
-        try:
-            while True:
-                self.door_state, self.last_update = get_door_state(self.host, self.port)
-                sleep(door_checking_period - time() % door_checking_period)
-        except KeyboardInterrupt:
-            pass
-
-    def gather_hour_data(self, output_dir_path):
-        start_time = datetime.now()
-        if 4 < start_time.minute:
+    def gather_hour_data(self, day: date, hour: int, output_dir_path) -> None:
+        # check if a delay is needed before running
+        # or if it isn't too late to start, up to 30 seconds too late is allowed
+        time_to_start = self.time_left_to_start(day, hour)
+        if time_to_start < -30:
             return None
+        elif time_to_start > 0:
+            sleep(time_to_start)
+        # gather data
         data = np.full(60, -2)
         for i in range(60):
+            star_time = time()
+            # get new data and save them if valid
+            self.door_state, self.last_update = get_door_state(self.host, self.port, timeout=10.0)
             if self.is_door_state_valid():
                 data[i] = self.door_state
             else:
                 data[i] = -1
-            sleep(60 - time() % 60)
-        file_name = self.generate_hour_file_name(start_time.date(), start_time.hour)
+            # wait about a minute
+            time_so_sleep = 60.0 - (time() - star_time)
+            if time_so_sleep < 0.0:
+                raise RuntimeError
+            sleep(time_so_sleep)
+        # save gathered data
+        file_name = self.generate_hour_file_name(day, hour)
         np.savetxt(f"{output_dir_path}/{file_name}", data, fmt='%i')
 
-    def schedule_daily_runs(self, day: date, out_path, starting_hour=0) -> Thread:
+    def schedule_daily_runs(self, day: date, out_path, starting_hour=0, ending_hour=23) -> Thread:
         now = datetime.now()
         if now.date() > day:
             raise RuntimeError
         elif now.date() == day:
             starting_hour = max(starting_hour, now.hour)
+
+        # schedule all events to start at correct time
         s = sched.scheduler(time, sleep)
-        for hour in range(starting_hour, 24):
-            action_start_time = datetime(year=day.year, month=day.month, day=day.day, hour=hour, minute=0, second=0)
-            time_to_start = max(action_start_time - now, timedelta(seconds=1))
-            s.enter(time_to_start.total_seconds(), 1, self.gather_hour_data, argument=(out_path,))
+        for hour in range(starting_hour, ending_hour+1):
+            # if an event should have already started, schedule it to run immediately
+            time_to_start = max(self.time_left_to_start(day, hour), 0.0)
+            s.enter(time_to_start, 1, self.gather_hour_data, argument=(day, hour, out_path))
             print(hour)
 
-        def run_data_gathering():
-            try:
-                s.run()
-            except KeyboardInterrupt:
-                pass
-        th = Thread(target=run_data_gathering, name="scheduled runs")
+        th = Thread(target=self.run_scheduled_data_gathering, name="scheduled runs", args=(s,))
         th.start()
         print("all running")
         return th
 
-    def is_door_state_valid(self):
-        if datetime.now() - self.last_update < data_validation_time:
+    def is_door_state_valid(self) -> bool:
+        if datetime.now() - self.last_update < self.data_validation_time:
             return True
         return False
 
@@ -77,22 +77,22 @@ class DoorStateTracker:
             return file_name
         return "incorrect.csv"
 
+    @staticmethod
+    def time_left_to_start(day: date, hour: int) -> float:
+        now = datetime.now()
+        when_to_start = datetime(year=day.year, month=day.month, day=day.day, hour=hour, minute=0, second=0)
+        time_to_start = when_to_start - now
+        return time_to_start.total_seconds()
 
-def print_active_th():
-    try:
-        while True:
-            print(enumerate())
-            sleep(10)
-    except KeyboardInterrupt:
-        pass
+    @staticmethod
+    def run_scheduled_data_gathering(s: sched.scheduler) -> None:
+        try:
+            s.run()
+        except KeyboardInterrupt:
+            pass
 
 
 if __name__ == '__main__':
-    th_printing = Thread(target=print_active_th, name="thread printing")
-    th_printing.start()
-
     ds = DoorStateTracker("localhost", 7216)
-    door_tracking_thread = Thread(target=ds.track_door_state, name="Door state tracking")
-    door_tracking_thread.start()
     scheduled_data_gathering = ds.schedule_daily_runs(date.today(), "./data")
     scheduled_data_gathering.join()
