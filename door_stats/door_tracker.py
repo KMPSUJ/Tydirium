@@ -1,4 +1,3 @@
-
 from bot.server_client import get_door_state
 from datetime import datetime, date, timedelta
 from time import time, sleep
@@ -12,7 +11,7 @@ class DoorStateTracker:
     port: int
     door_state: int
     last_update: datetime
-    data_validation_time = timedelta(seconds=300)  # seconds
+    data_validation_time = timedelta(seconds=300)
 
     def __init__(self, host: str, port: int):
         self.host = host
@@ -58,11 +57,9 @@ class DoorStateTracker:
             # if an event should have already started, schedule it to run immediately
             time_to_start = max(self.time_left_to_start(day, hour), 0.0)
             s.enter(time_to_start, 1, self.gather_hour_data, argument=(day, hour, out_path))
-            print(hour)
 
         th = Thread(target=self.run_scheduled_data_gathering, name="scheduled runs", args=(s,))
         th.start()
-        print("all running")
         return th
 
     def is_door_state_valid(self) -> bool:
