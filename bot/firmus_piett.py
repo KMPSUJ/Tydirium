@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 import discord
 from discord.ext import tasks
-from bot.server_client import get_door_state
+from bot.server_client import ServerClient
 
 
 HOST_NAME = "localhost"
@@ -17,16 +17,12 @@ NEW_CODE = "new code"
 REPORT = "report"
 
 
-
-class FirmusPiett(discord.Client):
+class FirmusPiett(discord.Client, ServerClient):
     """
     Main class for maintaining discord bot.
     Responsible for correct displaying state of the door as bot status
     and responding for users commands.
     """
-
-    host_name: str
-    port: int
 
     class Communicate:
         """
@@ -75,16 +71,12 @@ class FirmusPiett(discord.Client):
         self._last_code = -1
         self._communicate = FirmusPiett.Communicate()
         self.last_update = None
-        if host == "":
-            self.host_name = "localhost"
-        else:
-            self.host_name = host
-        self.port = port
+        ServerClient.__init__(self, host, port)
 
     @tasks.loop(seconds=REFRESH_TIME)
     async def refresh_status(self):
         now = datetime.now()
-        door_state, self.last_update = get_door_state(self.host_name, self.port)
+        door_state, self.last_update = self.get_door_state()
         if self.last_update is not None and (now - self.last_update) > PATIENCE:
             door_state = -1
         if self._last_code != door_state:
