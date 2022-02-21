@@ -35,6 +35,8 @@ class DataAnalyzer(ServerClient):
     # given a file list returns the prediction for that particular hour
     @staticmethod
     def make_predictions_for_given_file_list(file_list: list) -> np.ndarray:
+        if not file_list:
+            return np.full(60, -1.0)
         all_data = np.zeros((60, len(file_list)), dtype='int32')
         for i in range(len(file_list)):
             all_data[:, i] = np.loadtxt(file_list[i], dtype='int32')
