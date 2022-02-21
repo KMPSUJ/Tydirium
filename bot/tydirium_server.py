@@ -27,12 +27,7 @@ class ControlPanel(BaseHTTPRequestHandler):
 
     def do_POST(self): # pylint: disable=C0103
         print("I got POST")
-
-        serve_process = Process(target=self.accept_post, args={})
-        serve_process.start()
-        serve_process.join(timeout=HTTP_TIMEOUT)
-        if serve_process.is_alive():
-            serve_process.terminate()
+        self.accept_post()
 
     def do_GET(self): # pylint: disable=C0103
         if self.path == "/door-state":
