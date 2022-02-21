@@ -1,4 +1,4 @@
-from bot.server_client import get_door_state
+from bot.server_client import ServerClient
 from datetime import datetime, date, timedelta
 from time import time, sleep
 import sched
@@ -6,16 +6,13 @@ import numpy as np
 from threading import Thread
 
 
-class DoorStateTracker:
-    host: str
-    port: int
+class DoorStateTracker(ServerClient):
     door_state: int
     last_update: datetime
     data_validation_time = timedelta(seconds=300)
 
     def __init__(self, host: str, port: int):
-        self.host = host
-        self.port = port
+        ServerClient.__init__(self, host, port)
 
     def gather_hour_data(self, day: date, hour: int, output_dir_path) -> None:
         # check if a delay is needed before running
@@ -30,7 +27,7 @@ class DoorStateTracker:
         for i in range(60):
             star_time = time()
             # get new data and save them if valid
-            self.door_state, self.last_update = get_door_state(self.host, self.port, timeout=10.0)
+            self.door_state, self.last_update = self.get_door_state(timeout=10.0)
             if self.is_door_state_valid():
                 data[i] = self.door_state
             else:
