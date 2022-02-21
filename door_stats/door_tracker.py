@@ -27,7 +27,10 @@ class DoorStateTracker(ServerClient):
         for i in range(60):
             star_time = time()
             # get new data and save them if valid
-            self.door_state, self.last_update = self.get_door_state(timeout=10.0)
+            try:
+                self.door_state, self.last_update = self.get_door_state(timeout=10.0)
+            except:
+                pass
             if self.is_door_state_valid():
                 data[i] = self.door_state
             else:
