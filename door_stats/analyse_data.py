@@ -35,14 +35,15 @@ class DataAnalyzer(ServerClient):
     # given a file list returns the prediction for that particular hour
     @staticmethod
     def make_predictions_for_given_file_list(file_list: list) -> np.ndarray:
-        all_data = np.zeros((60, len(file_list)))
+        all_data = np.zeros((60, len(file_list)), dtype='int32')
         for i in range(len(file_list)):
-            all_data[:, i] = np.loadtxt(file_list[i])
-        # if data was missing than replace it with np.nan
-        all_data[all_data < 0.0] = np.nan
-        output = np.mean(all_data, axis=1)
+            all_data[:, i] = np.loadtxt(file_list[i], dtype='int32')
+        output = np.zeros(60)
+        for i in range(60):
+            this_hour_data = all_data[i, :]
+            output[i] = np.mean(this_hour_data[this_hour_data >= 0])
         # if all data for a given point was missing, replace np.nan with -1.0
-        output[output is np.nan] = -1.0
+        output[np.isnan(output)] = -1.0
         return output
 
     # finds the date of last day_of_week, returns ref_date if day of week is correct
