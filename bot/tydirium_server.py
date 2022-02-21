@@ -24,6 +24,7 @@ class ControlPanel(BaseHTTPRequestHandler):
     code_blue = -1
     # the type is always the same, easier to generate message
     last_update = datetime(1999, 12, 12, 12, 12, 12, 12)
+    predictions = dict()
 
     def do_POST(self): # pylint: disable=C0103
         print("I got POST")
@@ -33,7 +34,7 @@ class ControlPanel(BaseHTTPRequestHandler):
         if self.path == "/door-state":
             message = bytes(self.generate_door_state_message(), "utf8")
         elif self.path == "/door-state-prediction":
-            message = bytes("-1", "utf8")
+            message = bytes(self.generate_door_state_prediction_message(), "utf8")
         else:
             message = bytes(f"The path {self.path} is unknown. Try /door-state", "utf8")
         self.respond_with_this_message(message)
@@ -48,6 +49,15 @@ class ControlPanel(BaseHTTPRequestHandler):
     def generate_door_state_message(self) -> str:
         return str(self.code_blue) + "\n" + self.last_update.strftime(DATE_FORMAT)
 
+    def generate_door_state_prediction_message(self) -> str:
+        when = self.headers["Date-Time"]
+        try:
+            wanted_date = datetime.strptime(when, DATE_FORMAT)
+            message = ControlPanel.predictions[(wanted_date.isoweekday(), wanted_date.hour)][wanted_date.minute]
+        except:
+            message = "-1"
+        return message
+
     def respond_with_this_message(self, message: bytes):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -57,19 +67,37 @@ class ControlPanel(BaseHTTPRequestHandler):
 
     def accept_post(self):
         try:
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html')
-            self.end_headers()
-            # checks the Content-Length and reads the whole message
-            body = self.rfile.read(int(self.headers["Content-Length"]))
-            ControlPanel.code_blue = ControlPanel.parse_as_expected(body)
-            ControlPanel.last_update = datetime.now()
-            output = ""
-            self.wfile.write(output.encode())
-            print("Received code:", ControlPanel.code_blue)
+            if self.path == "/post/door-state-prediction":
+                self.accept_new_door_state_predictions()
+            else:
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                # checks the Content-Length and reads the whole message
+                body = self.rfile.read(int(self.headers["Content-Length"]))
+                ControlPanel.code_blue = ControlPanel.parse_as_expected(body)
+                ControlPanel.last_update = datetime.now()
+                output = ""
+                self.wfile.write(output.encode())
+                print("Received code:", ControlPanel.code_blue)
         except:
             self.send_error(404, f"{sys.exc_info()[0]}")
             print(sys.exc_info())
+
+    def accept_new_door_state_predictions(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
+        self.end_headers()
+        week_day = int(self.headers["Day-Of-Week"])
+        hour = int(self.headers["Hour"])
+        # read passed date, convert to str, split on \n into a list, and grab first 60 elements
+        predictions = str(self.rfile.read(int(self.headers["Content-Length"])))[2:].split(" ")[0:60]
+        # update stored predictions
+        ControlPanel.predictions[(week_day, hour)] = predictions
+        # respond with success code
+        output = f"{(week_day, hour)}"
+        self.wfile.write(output.encode())
+        print("Received predictions for :", (week_day, hour))
 
 
 def start_control_panel(panel):
