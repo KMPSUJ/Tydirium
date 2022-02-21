@@ -37,4 +37,4 @@ if __name__ == '__main__':
     DAY = today, HOST=localhost, PORT=7216, OUTPUT_PATH=./data
     """
     when, host_name, port_num, output_path = parse_args()
-    run_daily_door_state_gathering(date.today(), host_name, port_num, output_path)
+    run_daily_door_state_gathering(when, host_name, port_num, output_path)
