@@ -35,7 +35,9 @@ class DoorStateTracker(ServerClient):
                 data[i] = self.door_state
             else:
                 data[i] = -1
-            # wait about a minute
+            if i == 59:
+                break
+            # if ins not the last datapoint, wait about a minute
             time_so_sleep = 60.0 - (time() - star_time)
             if time_so_sleep < 0.0:
                 raise RuntimeError
