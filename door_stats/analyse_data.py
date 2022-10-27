@@ -43,7 +43,10 @@ class DataAnalyzer(ServerClient):
         output = np.zeros(60)
         for i in range(60):
             this_hour_data = all_data[i, :]
-            output[i] = np.mean(this_hour_data[this_hour_data >= 0])
+            if len(this_hour_data[this_hour_data >= 0]) == 0:
+                output[i] = -1.0
+            else:
+                output[i] = np.mean(this_hour_data[this_hour_data >= 0])
         # if all data for a given point was missing, replace np.nan with -1.0
         output[np.isnan(output)] = -1.0
         return output
