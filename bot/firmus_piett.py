@@ -8,6 +8,7 @@ from bot.server_client import ServerClient
 HOST_NAME = "localhost"
 PORT = 7216
 PIETT_TOKEN = os.getenv('PIETT_TOKEN', "")
+ADMIRALTEST_ID = int(os.getenv('ADMIRALTEST_ID', ""))
 PATIENCE = timedelta(minutes=10, seconds=0)
 REFRESH_TIME = 10  # in seconds
 
@@ -15,6 +16,7 @@ CMD_LEADER = "Admiral,"
 HELP = "help"
 NEW_CODE = "new code"
 REPORT = "report"
+CALM_DOWN = "calm down"
 
 
 class FirmusPiett(discord.Client, ServerClient):
@@ -69,16 +71,26 @@ class FirmusPiett(discord.Client, ServerClient):
         super().__init__()
         #  self._panel = panel
         self._last_code = -1
+        self._notified = 0
         self._communicate = FirmusPiett.Communicate()
-        self.last_update = None
+        self.last_update = datetime.min
         ServerClient.__init__(self, host, port)
+
+    async def notify(self):
+        channel = self.get_channel(ADMIRALTEST_ID) 
+        ans = "Gentlemen, we cannot determine the state of the door. Please fix it.\n" \
+        ""
+        await channel.send(ans)
 
     @tasks.loop(seconds=REFRESH_TIME)
     async def refresh_status(self):
         now = datetime.now()
         door_state, self.last_update = self.get_door_state()
-        if self.last_update is not None and (now - self.last_update) > PATIENCE:
+        if (now - self.last_update) > PATIENCE:
             door_state = -1
+            if self.last_update.year > 2000 and self._notified == 0:
+                await self.notify()
+                self._notified = 1
         if self._last_code != door_state:
             self._last_code = door_state
             presence = self._communicate.get(self._last_code)
@@ -134,25 +146,29 @@ class FirmusPiett(discord.Client, ServerClient):
     async def execute_order(self, cmd, channel, author):
         cmd = cmd.strip()
         if cmd.startswith(HELP):
-            await FirmusPiett.print_help(cmd[len(HELP):], channel, author)
+            await self.print_help(cmd[len(HELP):], channel, author)
         elif cmd.startswith(NEW_CODE):
             await self.new_code(cmd[len(NEW_CODE):], channel, author)
         elif cmd.startswith(REPORT):
             await self.report(cmd[len(REPORT):], channel, author)
+        elif cmd.startswith(CALM_DOWN):
+            await self.calm_down(cmd[len(CALM_DOWN):], channel, author)
         else:
             await FirmusPiett.bad_command(channel, author)
 
-    @staticmethod
-    async def print_help(cmd, channel, author):
+    async def print_help(self, cmd, channel, author):
         salutation = FirmusPiett.get_salutation(author)
         cmd = cmd.strip()
         if not cmd in ["", "!", "."]:
             await FirmusPiett.bad_command(channel, author)
         ans = f"Calm down, {salutation}, I'm here.\n" \
               "You can ask me for `report` to see current state of the door " \
-              "and last time when it was updated.\n" \
-              "You can also order me to `new code n`, so I would display " \
-              "the state of the door in different ways."
+              "and last time when it was updated.\n"
+        if FirmusPiett.has_permissions(author, 1):
+            ans += "You can also order me to `new code n`, so I would display " \
+              "the state of the door in different ways.\n" \
+              "If reported damage is already repaired, " \
+              "you can tell me to `calm down`."
         await channel.send(ans)
 
     async def new_code(self, cmd, channel, author):
@@ -201,6 +217,22 @@ class FirmusPiett(discord.Client, ServerClient):
     async def bad_command(channel, author):
         salutation = FirmusPiett.get_salutation(author)
         await channel.send(f"We have some communication disruption, {salutation}. Please repeat.")
+
+    async def calm_down(self, cmd, channel, author):
+        salutation = FirmusPiett.get_salutation(author)
+        cmd = cmd.strip()
+        if cmd not in ["", "!", "."]:
+            await FirmusPiett.bad_command(channel, author)
+        if not FirmusPiett.has_permissions(author, 1):
+            await channel.send(
+                f"{salutation}, you are not able to calm me down."
+            )
+            return
+        if self._notified == 1:
+            self._notified = 0
+            await channel.send(f"Yes {salutation}! Calming down")
+        else:
+            await channel.send(f"{salutation}, I am already calm.")
 
 
 if __name__ == "__main__":
